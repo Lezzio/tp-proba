@@ -4,9 +4,9 @@ library(randtoolbox)
 #Q2.1
 par(mfrow = c(2, 2)) #(2,2)
 hist(RANDU(34, 1000), xlab = 'val', ylab = 'Occurence', main = 'Randu', breaks = 20)
-hist(MersenneTwister(1000, 1, 34), xlab = 'val', ylab = 'Occurence', main = 'MersenneTwister', breaks = 20)
+hist(MersenneTwister(1000, 1, 34), xlab = 'val', ylab = 'Occurence', main = 'Mersenne-Twister', breaks = 20)
 hist(StandardMinimal(34, 1000), xlab = 'val', ylab = 'Occurence', main = 'StandardMinimal', breaks = 20)
-hist(VonNeumann(1000, 1, 34), xlab = 'val', ylab = 'Occurence', main = 'VonNeumann', breaks = 20)
+hist(VonNeumann(1000, 1, 34), xlab = 'val', ylab = 'Occurence', main = 'Von Neumann', breaks = 20)
 
 #Q2.2 -> Faire aussi pour les autres, commentez
 par(mfrow = c(2, 2))
@@ -29,7 +29,7 @@ for (i in 2:100) {
 hist(x)
 print(mean(x)) #Pval Moyen
 verifTest <- length(which(x > 0.01))
-print(verifTest / 100) #Nb de Pval passant le test de v�rif
+print(verifTest / 100) #Nb de Pval passant le test de vérif
 
 x <- Frequency(VonNeumann(1000, 1, graines[1]), 14)
 for (i in 2:100) {
@@ -38,7 +38,7 @@ for (i in 2:100) {
 hist(x)
 print(mean(x)) #Pval Moyen
 verifTest <- length(which(x > 0.01))
-print(verifTest / 100) #Nb de Pval passant le test de v�rif
+print(verifTest / 100) #Nb de Pval passant le test de vérif
 
 x <- Frequency(StandardMinimal(graines[1], 1000), 31)
 for (i in 2:100) {
@@ -47,7 +47,7 @@ for (i in 2:100) {
 hist(x)
 print(mean(x)) #Pval Moyen
 verifTest <- length(which(x > 0.01))
-print(verifTest / 100) #Nb de Pval passant le test de v�rif
+print(verifTest / 100) #Nb de Pval passant le test de vérif
 
 x <- Frequency(RANDU(graines[1], 1000), 32)
 for (i in 2:100) {
@@ -56,7 +56,7 @@ for (i in 2:100) {
 hist(x)
 print(mean(x)) #Pval Moyen
 verifTest <- length(which(x > 0.01))
-print(verifTest / 100) #Nb de Pval passant le test de v�rif
+print(verifTest / 100) #Nb de Pval passant le test de vérif
 #VN : 14bits, Mersenne : 32, RANDU + Standard : 31
 
 #Q4
@@ -85,7 +85,7 @@ for (i in 2:100) {
 hist(x)
 print(mean(x)) #Pval Moyen
 verifTest <- length(which(x > 0.01))
-print(verifTest / 100) #Nb de Pval passant le test de v�rif
+print(verifTest / 100) #Nb de Pval passant le test de vérif
 
 x <- Runs(MersenneTwister(1000, 1, graines[1]), 14)
 for (i in 2:100) {
@@ -94,7 +94,7 @@ for (i in 2:100) {
 hist(x)
 print(mean(x)) #Pval Moyen
 verifTest <- length(which(x > 0.01))
-print(verifTest / 100) #Nb de Pval passant le test de v�rif
+print(verifTest / 100) #Nb de Pval passant le test de vérif
 
 #Q5
 par(mfrow = c(1, 2))
@@ -105,16 +105,16 @@ for (i in 2:100) {
 hist(x, main = "Pval Mersenne-Twister", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
 print(mean(x)) #Pval Moyen
 verifTest <- length(which(x > 0.01))
-print(verifTest / 100) #Nb de Pval passant le test de v�rif
+print(verifTest / 100) #Nb de Pval passant le test de vérif
 
 x <- order.test(as.vector(VonNeumann(1000, 1, graines[1])), 4, FALSE)$p.value
 for (i in 2:100) {
   x <- c(x, order.test(as.vector(VonNeumann(1000, 1, graines[i])), 4, FALSE)$p.value)
 }
-hist(x, main = "Pval VonNeumann", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+hist(x, main = "Pval Von Neumann", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
 print(mean(x)) #Pval Moyen
 verifTest <- length(which(x > 0.01))
-print(verifTest / 100) #Nb de Pval passant le test de v�rif
+print(verifTest / 100) #Nb de Pval passant le test de vérif
 
 x <- order.test(RANDU(graines[1], 1000), 4, FALSE)$p.value
 for (i in 2:100) {

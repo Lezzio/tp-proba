@@ -43,7 +43,7 @@ RANDU <- function(seed, n)
   m <- 2^31
   x <- seed
   #b = 0
-  x <- c((x * a) %% m)
+  x <- (x * a) %% m
   for (i in 2:n)
   {
     x <- c(x, (x[i - 1] * a) %% m)
@@ -58,7 +58,7 @@ StandardMinimal <- function(seed, n)
   m <- 2^31 - 1
   x <- seed
   #b = 0
-  x <- c((x * a) %% m)
+  x <- (x * a) %% m
   for (i in 2:n)
   {
     x <- c(x, (x[i - 1] * a) %% m)
@@ -80,7 +80,7 @@ LoiBinomiale <- function(n, p)
     pk <- choose(n, k) * (p^k) * ((1 - p)^(n - k)) #Taille d'intervalle Pk
     somme <- somme + pk
   }
-  return(k) #Num�ro de l'intervalle dans lequel on est
+  return(k) #Numéro de l'intervalle dans lequel on est
 }
 
 LoiGausienne <- function(n, p)
@@ -93,20 +93,19 @@ LoiGausienne <- function(n, p)
     pk <- dnorm(k, n * p, sqrt(n * p * (1 - p))) #Taille d'intervalle Pk
     somme <- somme + pk
   }
-  return(k) #Num�ro de l'intervalle dans lequel on est
+  return(k) #Numéro de l'intervalle dans lequel on est
 }
 
-SimInversion <- function() { #Difficile � appliquer g�n�ralement
-  u = runif(1)
+SimInversion <- function() { #Difficile à appliquer généralement
+  u <- runif(1)
   return(res = exp(sqrt(u) * log(2)) - 1)
 }
 
-#F-1, donc F est la fct de r�partition
-
+#F-1, donc F est la fonction de répartition
 SimRejet <- function() {
   u <- runif(1)
   y <- runif(1)
-  while (u > (log(1 + y) / (1 + y))) { #Tant qu'on est pas sup � U...
+  while (u > (log(1 + y) / (1 + y))) { #Tant qu'on est pas sup à U...
     u <- runif(1) #... on re-simule u et y
     y <- runif(1)
   }

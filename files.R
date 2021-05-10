@@ -119,12 +119,14 @@ fileEvolution <- function(arrivee, depart) {
 }
 
 esperanceFile <- function(arrivee, depart, T, N) {
+  #Calcul de l'espérance E[N]
   sum <- 0
   for(i in 1:(length(N) - 1)) {
     sum <- sum + N[i] * (T[i+1] - T[i])
   }
   esperanceN <- sum / T[length(T)] #Calcul expérimental du E[N] qui devrait faire alpha / (1 - alpha)
 
+  #Calcul de l'espérance E[W]
   W <- 0
   for(i in seq_along(depart)) {
     W <- W + (depart[i] - arrivee[i])

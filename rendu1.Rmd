@@ -83,13 +83,13 @@ Voyons maintenant la valeur Sn+1 en fonction de Sn
 par(mfrow = c(2, 2))
 n <- 1000
 u <- VonNeumann(1000, 1, 34)
-plot(u[1:(n - 1)], u[2:n], xlab = 'Sn', ylab = 'Sn+1', col = 'red')
+plot(u[1:(n - 1)], u[2:n], main = "Von Neumann", xlab = 'Sn', ylab = 'Sn+1', col = 'red')
 u <- MersenneTwister(1000, 1, 34)
-plot(u[1:(n - 1)], u[2:n], xlab = 'Sn', ylab = 'Sn+1', col = 'blue')
+plot(u[1:(n - 1)], u[2:n], main = "Mersenne-Twister", xlab = 'Sn', ylab = 'Sn+1', col = 'blue')
 u <- StandardMinimal(34, 1000)
-plot(u[1:(n - 1)], u[2:n], xlab = 'Sn', ylab = 'Sn+1', col = 'green')
+plot(u[1:(n - 1)], u[2:n], main = "Standard Minimal", xlab = 'Sn', ylab = 'Sn+1', col = 'green')
 u <- RANDU(34, 1000)
-plot(u[1:(n - 1)], u[2:n], xlab = 'Sn', ylab = 'Sn+1', col = 'yellow')
+plot(u[1:(n - 1)], u[2:n], main = "RANDU", xlab = 'Sn', ylab = 'Sn+1', col = 'yellow')
 ```
 
 Mersenne-Twister, RANDU et Standard Minimal semble ne pas avoir de dépendance entre les différentes valeurs. Cependant, ce n'est pas le cas de VonNeumann, où la valeur précédente impacte grandement la suivante.
@@ -216,7 +216,7 @@ x <- order.test(as.vector(VonNeumann(1000, 1, graines[1])), 4, FALSE)$p.value
 for (i in 2:100) {
   x <- c(x, order.test(as.vector(VonNeumann(1000, 1, graines[i])), 4, FALSE)$p.value)
 }
-hist(x, main = "Pval VonNeumann", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+hist(x, main = "Pval Von Neumann", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
 
 x <- order.test(RANDU(graines[1], 1000), 4, FALSE)$p.value
 for (i in 2:100) {
@@ -374,8 +374,8 @@ Unité : nanosecondes
 
 | expr           | min  | lq   | mean  | medium | uq    | max    | neval |
 |----------------|------|------|-------|--------|-------|--------|-------|
-| SimInversion() | 2000 | 2250 | 3251  | 3100   | 3900  |  7600  | 100   |
-| SimRejet       | 3700 | 7750 | 22359 | 16000  | 28700 | 129600 | 100   |
+| SimInversion() | 2000 | 2250 |  3251 |  3100  |  3900 |   7600 |   100 |
+| SimRejet       | 3700 | 7750 | 22359 | 16000  | 28700 | 129600 |   100 |
 
 Le package microbenchmark() nous permet de comparer les propriétés des algorithmes de simulation par rejet et simulation par inversion tel que la moyenne, la médiane, les quartiles , etc...
 Nous remarquons que la Simulation par Inversion est bien plus performante. Cela est normal, puisque nous l'inverse de la fonction est codée en dûr, et ne boucle pas. Cependant, celle-ci est rarement applicable, puisqu'il est souvent difficile, voir impossible de trouver la fonction inverse. Au contraire, la simulation par rejet est employable dans la plupart des cas : il suffit juste de bien déterminer la fonction G.
@@ -387,29 +387,13 @@ Nous allons ici étudier les files d'attentes dites PAPS. Dans ce type de file, 
 
 ### 3.1 : Files M/M/1
 
-```{r}
-file08 <- FileMM1(8, 15, 12)
-file14 <- FileMM1(14, 15, 12)
-file15 <- FileMM1(15, 15, 12)
-file20 <- FileMM1(20, 15, 12)
-```
+Nous allons générer deux listes qui renvoient les dates d’arrivée et de départ des clients. Ces dates sont générées grâce à une loi exponentielle, ainsi chaque date d’arrivée est bien indépendante de la précédente. Il s’agit de l’absence de mémoire qui caractérise le comportement d’une file d’attente.
 
-Dans tous les cas, 15 personnes partent en moyenne par heure. Si seulement 8 clients arrivent par heure (graph 1), tout le monde est vite servi, et la file est principalement vide. Pour 14 et 15, malgré des pics d'attente, la file reste souvent vide.
-Enfin, pour 20 clients / heure, le serveur n'arrive pas à servir assez de monde : le flux entrant est trop important, la file s'allonge et le serveur sature. On en conclue qu'il ne faut pas excéder les possibilités du serveur en terme de capacité, sous peine de voir une saturation rapide.
+Ensuite, ces deux derniers tableaux nous permettent de calculer l’évolution du nombre de clients dans la file d’attente, au cours du temps.
 
-### Formule de Little
-```{r}
-file08 <- FileMM1(8, 15, 12)
-file14 <- FileMM1(14, 15, 12)
-file15 <- FileMM1(15, 15, 12)
-file20 <- FileMM1(20, 15, 12)
-```
+On choisit λ et µ tels qu'arrivent en moyenne 6 clients par heure et repartent en moyenne 11 clients par heure. Si 6 clients arrivent par heure, il y a donc 6/60 = 0.1 client par minute, donc λ=0.1. De même, si 11 clients repartent par heure, on a donc µ=11/60=0.183.
 
-Les résultats estimés de $lambda*E(W)$ sont proches des valeurs attendus de la formule de Little $E(N) = lambda*E(W)$
-
-En augmentant D pour approcher la vraie valeur W. On en déduit que, lorsque D augmente, l'espérance de W multipliée par $lambda$ approche l'espérance de N.
-
-```{r}
+```{r, echo=FALSE}
 par(mfrow = c(2, 2))
 filemm1First <- FileMM1(0.1, 0.183, 12 * 60)
 firstEvolution <- fileEvolution(filemm1First[[1]], filemm1First[[2]])
@@ -428,3 +412,22 @@ fourthEvolution <- fileEvolution(filemm1Fourth[[1]], filemm1Fourth[[2]])
 plot(fourthEvolution[[1]], fourthEvolution[[2]], type = "s", main = "Évolution d'une file λ=0.25 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
 
 ```
+La durée entre deux arrivées suit une loi exponentielle de paramètre λ, dont l’espérance est 1/λ. C’est-à-dire que le temps moyen d’attente d’une nouvelle arrivée est de 1/λ. Autrement dit, on a une moyenne de λ arrivées par unité de temps. Ainsi, sur un intervalle de temps t, on a bien une moyenne de λt arrivées.
+
+
+
+Dans tous les cas, 15 personnes partent en moyenne par heure. Si seulement 8 clients arrivent par heure (graph 1), tout le monde est vite servi, et la file est principalement vide. Pour 14 et 15, malgré des pics d'attente, la file reste souvent vide.
+Enfin, pour 20 clients / heure, le serveur n'arrive pas à servir assez de monde : le flux entrant est trop important, la file s'allonge et le serveur sature. On en conclue qu'il ne faut pas excéder les possibilités du serveur en terme de capacité, sous peine de voir une saturation rapide.
+
+### 3.2 : Formule de Little
+
+On va étudier un régime stable, c’est-à-dire dans le cas où on a  α = λ/µ < 1. Cela veut dire que le nombre moyen d’arrivées en un certain temps est inférieur au nombre de départs, et que le nombre de personnes dans la file d’attente va se stabiliser. Ainsi, la file ne s’encombre pas et ne saturera pas.
+
+Il s’agit ici de calculer le nombre moyen de clients dans le système E(N) ainsi que le temps de présence d’un client dans le système E(W). Nous devons vérifier la formule de Little : E(N) = λ E(W), λ représentant le nombre moyen d’arrivée de clients par minute.
+Pour calculer E(N), on reprend les résultats de la question 7 et on fait la moyenne du nombre de clients en attente. /!\ Attention, il ne suffit pas de sommer les N et de diviser par le nombre de valeurs, car les mesures de N ne sont pas faites à intervalles réguliers, mais seulement lorsqu’un client arrive ou repart. Ainsi, il faut multiplier la valeur de N par le temps pendant lequel ce N vaut. Enfin, on divise le résultat par le temps total en minutes.
+
+```{r}
+#e <- esperanceFile(a[[1]], a[[2]], evo[[1]], evo[[2]])
+```
+
+On trouve bien deux valeurs très proches pour E(N) et λE(W). Les valeurs faibles (autour de 1), ce qui signifie qu’il y a très peu de personnes dans la file d’attente. (ex : si E(N)=1.3, alors il y a en moyenne 1.3 personnes dans le système, donc 1 personne dont la requête est en train d’être traitée et en moyenne 0.3 personne en train d’attendre son tour).
