@@ -1,0 +1,425 @@
+---
+title: "Rendu1"
+author: "B3404"
+date: "09/05/2021"
+output:
+html_document:
+df_print: paged
+pdf_document: default
+---
+```{r, include=FALSE}
+source("../../Downloads/generateurs.R")
+source("utile.R")
+source("files.R")
+library(randtoolbox)
+library(microbenchmark)
+graines = sample.int(9999, 100)
+```
+
+
+# Compte rendu Guigal, Penot, Souabi, Collard
+### 09/05/2021
+***
+Ce compte-rendu rend compte du TP de probabilités
+
+## 1 : Tests de générateurs pseudo-aléatoires
+Nous allons lors de ce TP tester 4 générateurs : VonNeumann, RANDU, Standard Minimal et Mersenne-Twister.
+
+### 1.1 : Définition des générateurs
+
+Code de Standards Minimal :
+```
+StandardMinimal <- function(seed,n)
+  a <- 16807
+  m <- 2^31-1
+  x <- seed
+  #b = 0
+  x <- (x*a)%%m
+  for(i in 1:n) 
+  {
+    x <- c(x,(x[i-1]*a)%%m)
+  }
+  #x <- x/m #Normalise x
+  return(x)
+```
+Code de RANDU
+```
+RANDU <- function(seed,n)
+{
+  a <- 65539
+  m <- 2^31
+  x <- seed
+  #b = 0
+  x <- (x*a)%%m
+  for(i in 1:n) 
+  {
+    x <- c(x,(x[i-1]*a)%%m)
+  }
+  #x <- x/m #Normalise x
+  return(x)
+}
+```
+Nous noterons que les générateurs de VonNeumann et Mersenne-Twister ont déjà été définis au préalable.
+
+### 1.2 : Tests des qualités des séquences produites
+Afin de tester la qualité des générateurs, nous allons procéder à plusieurs tests.
+
+#### 1.2.1 : Test visuel
+Générons une séquence avec chaque générateur et observons la répartition des valeurs :
+
+```{r}
+par(mfrow = c(2, 2))
+hist(RANDU(34, 1000), xlab = 'valeur', ylab = 'Occurence', main = 'Randu', breaks = 20)
+hist(MersenneTwister(1000, 1, 34), xlab = 'valeur', ylab = 'Occurence', main = 'MersenneTwister', breaks = 20)
+hist(StandardMinimal(34, 1000), xlab = 'valeur', ylab = 'Occurence', main = 'StandardMinimal', breaks = 20)
+hist(VonNeumann(1000, 1, 34), xlab = 'valeur', ylab = 'Occurence', main = 'VonNeumann', breaks = 20)
+```
+
+Nous constatons que chaque générateur semble avoir une étendue satisfaisante, excepté celui de VonNeumann.
+
+Voyons maintenant la valeur Sn+1 en fonction de Sn
+
+```{r}
+par(mfrow = c(2, 2))
+n <- 1000
+u <- VonNeumann(1000, 1, 34)
+plot(u[1:(n - 1)], u[2:n], xlab = 'Sn', ylab = 'Sn+1', col = 'red')
+u <- MersenneTwister(1000, 1, 34)
+plot(u[1:(n - 1)], u[2:n], xlab = 'Sn', ylab = 'Sn+1', col = 'blue')
+u <- StandardMinimal(34, 1000)
+plot(u[1:(n - 1)], u[2:n], xlab = 'Sn', ylab = 'Sn+1', col = 'green')
+u <- RANDU(34, 1000)
+plot(u[1:(n - 1)], u[2:n], xlab = 'Sn', ylab = 'Sn+1', col = 'yellow')
+```
+
+Mersenne-Twister, RANDU et Standard Minimal semble ne pas avoir de dépendance entre les différentes valeurs. Cependant, ce n'est pas le cas de VonNeumann, où la valeur précédente impacte grandement la suivante.
+
+### 1.2.2 : Test de fréquence monobit
+Nous allons tester donc si le nombre de uns et de zéros d'une séquence sont approximativement les mêmes, comme attendu dans une séquence vraiment aléatoire.
+
+```{r,echo=FALSE}
+par(mfrow = c(2, 2))
+graines = sample.int(9999, 100)
+x <- Frequency(MersenneTwister(1000, 1, graines[1]), 32)
+for (i in 2:100) {
+  x <- c(x, Frequency(MersenneTwister(1000, 1, graines[i]), 32))
+}
+hist(x, main = "Pval Mersenne-Twister", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+#print(mean(x)) #Pval Moyen
+verifTest <- length(which(x > 0.01))
+#print(verifTest/100) #Nb de Pval passant le test de vérif
+
+x <- Frequency(VonNeumann(1000, 1, graines[1]), 14)
+for (i in 2:100) {
+  x <- c(x, Frequency(VonNeumann(1000, 1, graines[i]), 14))
+}
+hist(x, main = "Pval VonNeumann", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+#print(mean(x)) #Pval Moyen
+verifTest <- length(which(x > 0.01))
+#print(verifTest/100) #Nb de Pval passant le test de vérif
+
+x <- Frequency(StandardMinimal(graines[1], 1000), 31)
+for (i in 2:100) {
+  x <- c(x, Frequency(StandardMinimal(graines[i], 1000), 31))
+}
+hist(x, main = "Pval Standard Minimal", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+#print(mean(x)) #Pval Moyen
+verifTest <- length(which(x > 0.01))
+#print(verifTest/100) #Nb de Pval passant le test de vérif
+
+x <- Frequency(RANDU(graines[1], 1000), 32)
+for (i in 2:100) {
+  x <- c(x, Frequency(RANDU(graines[i], 1000), 32))
+}
+hist(x, main = "Pval RANDU", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+#print(mean(x)) #Pval Moyen
+verifTest <- length(which(x > 0.01))
+#print(verifTest/100) #Nb de Pval passant le test de vérif
+```
+
+**Règle de décision à 1% : **Plus la Pvaleur est petite plus on peut rejeter de manière sûre le fait que le séquence est aléatoire. En pratique, si la Pvaleur calculée est inférieure à 0.01 alors la séquence n'est pas aléatoire. Sinon, on ne peut pas conclure pour autant qu'elle l'est, mais rien n'infirme cette hypothèse, au sens de ce test.
+
+En calculant les Pvaleurs et en effectuant les tests de validation, on obtient ce tableau
+
+|    Algorithme    | Pvaleur | Taux de réussite |
+|------------------|---------|------------------|
+| Mersenne-Twister | 0.52    | 0.99             |
+| RANDU            | 0.10    | 0.14             |
+| Standard Minimal | 0.49    | 0.98             |
+| VonNeumann       | 0.01    | 0.05             |
+
+#### 1.2.3 : Test des runs
+Nous allons observer les suites ininterrompues de 0 et de 1
+
+```{r,echo=FALSE}
+par(mfrow = c(2, 2))
+x <- Runs(RANDU(graines[1], 1000), 31)
+for (i in 2:100) {
+  x <- c(x, Runs(RANDU(graines[i], 1000), 31))
+}
+hist(x, main = "RANDU", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+#print(mean(x))
+verifTest <- length(which(x > 0.01))
+#(verifTest/100)
+
+x <- Runs(StandardMinimal(graines[1], 1000), 31)
+for (i in 2:100) {
+  x <- c(x, Runs(StandardMinimal(graines[i], 1000), 31))
+}
+hist(x, main = "Pval Standard Minimal", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+#print(mean(x))
+verifTest <- length(which(x > 0.01))
+#print(verifTest/100)
+
+x <- Runs(VonNeumann(1000, 1, graines[1]), 14)
+for (i in 2:100) {
+  x <- c(x, Runs(VonNeumann(1000, 1, graines[i]), 14))
+}
+hist(x, main = "Pval VonNeumann", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+#print(mean(x)) #Pval Moyen
+verifTest <- length(which(x > 0.01))
+#print(verifTest/100) #Nb de Pval passant le test de vérif
+
+x <- Runs(MersenneTwister(1000, 1, graines[1]), 14)
+for (i in 2:100) {
+  x <- c(x, Runs(MersenneTwister(1000, 1, graines[i]), 14))
+}
+hist(x, main = "Pval Mersenne-Twister", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+#print(mean(x)) #Pval Moyen
+verifTest <- length(which(x > 0.01))
+#print(verifTest/100) #Nb de Pval passant le test de vérif
+```
+
+De la même manière qu'auparavant, on obtient
+
+|    Algorithme    | Pvaleur | Taux de réussite |
+|:----------------:|---------|------------------|
+| Mersenne-Twister | 0.56    | 1.00             |
+| RANDU            | 0.19    | 0.25             |
+| Standard Minimal | 0.49    | 0.98             |
+| VonNeumann       | 0.00    | 0.00             |
+
+#### 1.2.4 : Test d'ordre
+
+De la même manière qu'auparavant, on obtient
+
+```{r,echo=FALSE}
+par(mfrow = c(2, 2))
+
+x <- order.test(as.vector(MersenneTwister(1000, 1, graines[1])), 4, FALSE)$p.value
+for (i in 2:100) {
+  x <- c(x, order.test(as.vector(MersenneTwister(1000, 1, graines[i])), 4, FALSE)$p.value)
+}
+hist(x, main = "Pval Mersenne-Twister", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+
+x <- order.test(as.vector(VonNeumann(1000, 1, graines[1])), 4, FALSE)$p.value
+for (i in 2:100) {
+  x <- c(x, order.test(as.vector(VonNeumann(1000, 1, graines[i])), 4, FALSE)$p.value)
+}
+hist(x, main = "Pval VonNeumann", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+
+x <- order.test(RANDU(graines[1], 1000), 4, FALSE)$p.value
+for (i in 2:100) {
+  x <- c(x, order.test(RANDU(graines[1], 1000), 4, FALSE)$p.value)
+}
+hist(x, main = "Pval RANDU", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+
+x <- order.test(StandardMinimal(graines[1], 1000), 4, FALSE)$p.value
+for (i in 2:100) {
+  x <- c(x, order.test(StandardMinimal(graines[1], 1000), 4, FALSE)$p.value)
+}
+hist(x, main = "Pval Standard Minimal", xlab = 'Valeur', ylab = 'Occurence', breaks = 20)
+```
+
+|    Algorithme    | Pvaleur | Taux de réussite |
+|:----------------:|---------|------------------|
+| Mersenne-Twister | 0.51    | 0.96             |
+| RANDU            | 0.21    | 0.27             |
+| Standard Minimal | 0.50    | 1.00             |
+| VonNeumann       | 0.00    | 0.00             |
+
+## 2 : Simulations de lois de probabilités quelconques
+
+Nous allons maintenant étudier la simulation de loi de probabilités quelconques. Nous allons tout au long nous baser sur la loi uniforme, et voir comment celle-ci peut nous aider à simuler différents phénomènes aléatoires.
+
+### 2.1 : Lois discrètes
+
+Simulons une loi binomiale à partir de la loi uniforme $U$. Faisons de même avec la loi Gausienne, puis comparons les deux entre elles. Les algos sont les suivants :
+
+```{r}
+LoiBinomiale <- function(n, p)
+{
+  u = runif(1)
+  k = 0
+  somme = 0
+  while (u > somme) {
+    k = k + 1
+    pk = choose(n, k) * (p^k) * ((1 - p)^(n - k))
+    somme = somme + pk
+  }
+  return(k)
+}
+
+LoiGausienne <- function(n, p)
+{
+  u = runif(1)
+  k = 0
+  somme = 0
+  while (u > somme) {
+    k = k + 1
+    pk = dnorm(k, n * p, sqrt(n * p * (1 - p)))
+    somme = somme + pk
+  }
+  return(k)
+}
+```
+
+En lançant les algorithmes n fois, nous obtenons les diagrammes suivants :
+
+```{r, echo=FALSE, fig.height=5, fig.width=15}
+nf <- layout(matrix(c(1, 2, 3, 4, 5, 6, 7, 8), ncol = 2), widths = c(4, 4, 4, 4, 4, 4, 4, 4), heights = c(4, 4, 4, 4, 4, 4, 4, 4), TRUE)
+n <- 100
+binom <- LoiBinomiale(100, 0.2)
+for (i in 1:n) {
+  binom <- c(binom, LoiBinomiale(100, 0.2))
+}
+plot(table(binom), main = 'Binomial n = 100', xlab = 'Nb de succès', ylab = 'Fréquence')
+
+gaussi <- LoiGausienne(100, 0.2)
+for (i in 1:n) {
+  gaussi <- c(gaussi, LoiGausienne(100, 0.2))
+}
+plot(table(gaussi), main = 'Gausienne n = 100', xlab = 'Nb de succès', ylab = 'Fréquence')
+
+
+
+n <- 1000
+binom <- LoiBinomiale(100, 0.2)
+for (i in 1:n) {
+  binom <- c(binom, LoiBinomiale(100, 0.2))
+}
+plot(table(binom), main = 'Binomial n = 1000', xlab = 'Nb de succès', ylab = 'Fréquence')
+
+gaussi <- LoiGausienne(100, 0.2)
+for (i in 1:n) {
+  gaussi <- c(gaussi, LoiGausienne(100, 0.2))
+}
+plot(table(gaussi), main = 'Gausienne n = 1000', xlab = 'Nb de succès', ylab = 'Fréquence')
+
+
+
+n <- 10000
+binom <- LoiBinomiale(100, 0.2)
+for (i in 1:n) {
+  binom <- c(binom, LoiBinomiale(100, 0.2))
+}
+plot(table(binom), main = 'Binomial n = 10000', xlab = 'Nb de succès', ylab = 'Fréquence')
+
+gaussi <- LoiGausienne(100, 0.2)
+for (i in 1:n) {
+  gaussi <- c(gaussi, LoiGausienne(100, 0.2))
+}
+plot(table(gaussi), main = 'Gausienne n = 10000', xlab = 'Nb de succès', ylab = 'Fréquence')
+
+
+n <- 100000
+binom <- LoiBinomiale(100, 0.2)
+for (i in 1:n) {
+  binom <- c(binom, LoiBinomiale(100, 0.2))
+}
+plot(table(binom), main = 'Binomial n = 100000', xlab = 'Nb de succès', ylab = 'Fréquence')
+
+gaussi <- LoiGausienne(100, 0.2)
+for (i in 1:n) {
+  gaussi <- c(gaussi, LoiGausienne(100, 0.2))
+}
+plot(table(gaussi), main = 'Gausienne n = 100000', xlab = 'Nb de succès', ylab = 'Fréquence')
+
+```
+
+
+On constate que, plus *n* est grand, plus les simulations de loi se rapprochent d'une forme gaussienne. Nous pouvons donc considérer que, lorsque n est grand, nous pouvons simuler la loi Binomiale par la loi Gausienne, et cela avec une qualité satisfaisante. En effet, le calcul de la fonction de masse de la loi binomiale devient rapidement fastidieux lorsque n est grand, il est alors possible d'utiliser des approximations par d'autres lois de probabilité telles que la loi de Poisson ou la loi normale et d'utiliser des tables de valeurs.
+
+### 2.2 : Lois continues
+
+Nous allons maintenant simuler une loi continue, grâce à la loi uniforme. Nous allons étudier les performances de deux algorithmes : la simulation par inversion, et celle par rejet. Pour cela, nous allons simuler la loi suivante :
+$F(x)=2/ln(2)² * ln(1+x)/(1+x)*U(x)$
+
+Pour la simulation par inversion, on simule une loi de probabilité de fonction de répartition F. Dans notre cas, on sait que F est inversible. Soit U la loi uniforme sur [0,1]. Cet algorithme renvoie la variable $X = F^-1(U)$ qui a une fonction de répartition F.
+
+Pour simuler par rejet, on pose que $F ≤ c*G$  avec c une constante positive et G une densité de probabilité que l'on peut aisément simuler. G est une loi de densité uniforme sur [0,1] dans notre cas.
+
+Simulons la fonction F à travers les deux méthodes :
+
+```{r}
+SimInversion <- function() { #Difficile à appliquer généralement
+  u = runif(1)
+  return(res = exp(sqrt(u) * log(2)) - 1)
+} #F-1, donc F est la fct de répartition
+
+SimRejet <- function() {
+  u <- runif(1)
+  y <- runif(1)
+  while (u > (log(1 + y) / (1 + y))) { #Tant qu'on est pas sup à U...
+    u <- runif(1) #... on re-simule u et y
+    y <- runif(1)
+  }
+  return(y)
+}
+```
+
+Voici la mesure des performances :
+
+Unité : nanosecondes
+
+| expr           | min  | lq   | mean  | medium | uq    | max    | neval |
+|----------------|------|------|-------|--------|-------|--------|-------|
+| SimInversion() | 2000 | 2250 | 3251  | 3100   | 3900  |  7600  | 100   |
+| SimRejet       | 3700 | 7750 | 22359 | 16000  | 28700 | 129600 | 100   |
+
+Le package microbenchmark() nous permet de comparer les propriétés des algorithmes de simulation par rejet et simulation par inversion tel que la moyenne, la médiane, les quartiles , etc...
+Nous remarquons que la Simulation par Inversion est bien plus performante. Cela est normal, puisque nous l'inverse de la fonction est codée en dûr, et ne boucle pas. Cependant, celle-ci est rarement applicable, puisqu'il est souvent difficile, voir impossible de trouver la fonction inverse. Au contraire, la simulation par rejet est employable dans la plupart des cas : il suffit juste de bien déterminer la fonction G.
+
+
+## 3 : Application aux files d'attentes
+
+Nous allons ici étudier les files d'attentes dites PAPS. Dans ce type de file, les clients sont servis dans l'ordre d'arrivée. Le principe est que nous disposons de *n* serveurs répondant aux attentes des clients. Le but est d'étudier le nombre de clients en attente, le temps moyen d'attente, etc dans le système. Pour rappel, nous utiliserons la notation de Kendall.
+
+### 3.1 : Files M/M/1
+
+```{r}
+file08 <- FileMM1(8, 15, 12)
+file14 <- FileMM1(14, 15, 12)
+file15 <- FileMM1(15, 15, 12)
+file20 <- FileMM1(20, 15, 12)
+```
+
+Dans tous les cas, 15 personnes partent en moyenne par heure. Si seulement 8 clients arrivent par heure (graph 1), tout le monde est vite servi, et la file est principalement vide. Pour 14 et 15, malgré des pics d'attente, la file reste souvent vide.
+Enfin, pour 20 clients / heure, le serveur n'arrive pas à servir assez de monde : le flux entrant est trop important, la file s'allonge et le serveur sature. On en conclue qu'il ne faut pas excéder les possibilités du serveur en terme de capacité, sous peine de voir une saturation rapide.
+
+### Formule de Little
+```{r}
+file08 <- FileMM1(8, 15, 12)
+file14 <- FileMM1(14, 15, 12)
+file15 <- FileMM1(15, 15, 12)
+file20 <- FileMM1(20, 15, 12)
+```
+
+Les résultats estimés de $lambda*E(W)$ sont proches des valeurs attendus de la formule de Little $E(N) = lambda*E(W)$
+
+En augmentant D pour approcher la vraie valeur W. On en déduit que, lorsque D augmente, l'espérance de W multipliée par $lambda$ approche l'espérance de N.
+
+```{r}
+par(mfrow = c(2, 2))
+filemm1First <- FileMM1(0.1, 0.183, 12 * 60)
+plot(filemm1First[[1]], filemm1First[[2]], type = "s", main = "Évolution d'une file λ=0.1 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
+
+filemm1Second <- FileMM1(10 / 60, 0.183, 12 * 60) #Lambda ~ 0.1667
+plot(filemm1Second[[1]], filemm1Second[[2]], type = "s", main = "Évolution d'une file λ=0.1667 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
+
+filemm1Third <- FileMM1(11 / 60, 0.183, 12 * 60) #Lambda ~ 0.1833
+plot(filemm1Third[[1]], filemm1Third[[2]], type = "s", main = "Évolution d'une file λ=0.1667 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
+
+filemm1Fourth <- FileMM1(0.25, 0.183, 12 * 60)
+plot(filemm1Fourth[[1]], filemm1Fourth[[2]], type = "s", main = "Évolution d'une file λ=0.1667 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
+```
