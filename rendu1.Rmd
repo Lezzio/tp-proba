@@ -60,7 +60,7 @@ RANDU <- function(seed,n)
 ```
 Nous noterons que les générateurs de VonNeumann et Mersenne-Twister ont déjà été définis au préalable.
 
-### 1.2 : Tests des qualités des séquences produites
+### 1.2 : Tests de qualité des séquences produites
 Afin de tester la qualité des générateurs, nous allons procéder à plusieurs tests.
 
 #### 1.2.1 : Test visuel
@@ -74,7 +74,7 @@ hist(StandardMinimal(34,1000),xlab='valeur',ylab='Occurence',main='StandardMinim
 hist(VonNeumann(1000,1,34),xlab='valeur',ylab='Occurence',main='VonNeumann',breaks = 20)
 ```
 
-Nous constatons que chaque générateur semble avoir une étendue satisfaisante, excepté celui de VonNeumann.
+Nous constatons que chaque générateur semblent avoir une étendue satisfaisante, excepté celui de VonNeumann.
 
 Voyons maintenant la valeur Sn+1 en fonction de Sn
 
@@ -94,7 +94,7 @@ plot(u[1:(n - 1)], u[2:n], main = "RANDU", xlab = 'Sn', ylab = 'Sn+1', col = 'ye
 Mersenne-Twister, RANDU et Standard Minimal semble ne pas avoir de dépendance entre les différentes valeurs. Cependant, ce n'est pas le cas de VonNeumann, où la valeur précédente impacte grandement la suivante.
 
 ### 1.2.2 : Test de fréquence monobit
-Nous allons tester donc si le nombre de uns et de zéros d'une séquence sont approximativement les mêmes, comme attendu dans une séquence vraiment aléatoire.
+Nous allons tester donc si les nombres de uns et de zéros d'une séquence sont approximativement les mêmes, comme attendu dans une séquence vraiment aléatoire.
 
 On calcule une somme Sn, qui ajoute +1 pour chaque bit à 1 et -1 pour chaque bit à 0. Plus cette somme est éloignée de 0, moins la séquence de bits générée est homogène. On en déduit ensuite Sobs en divisant par l’écart-type. On place la valeur de Sobs sur la courbe de densité de la loi normale centrée réduite, de manière symétrique, en on en déduit la Pvaleur. En effet, la Pvaleur correspond à l’intégrale de -∞ à - Sobs de f(x)dx +  l’intégrale de +sobs à +∞ de f(x)dx, f(x) étant la densité de la loi normale centrée réduite.
 
