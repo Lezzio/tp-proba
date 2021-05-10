@@ -46,102 +46,8 @@ FileMM1 <- function(lambda, mu, D) {
   return (list("arrivee" = arrivee, "depart" = depart))
 }
 
-evoFile <- function(arrivee, depart) {
-
-  count <- vector()
-  time <- vector()
-
-  aIndex <- 1
-  dIndex <- 1
-  currentCount <- 0
-
-  while (aIndex < length(arrivee) && dIndex < length(depart)) {
-
-    a <- arrivee[aIndex]
-    d <- depart[dIndex]
-
-    #Départ et arrivée en même temps
-    if(a == d) {
-      count <- c(count, currentCount)
-      time <- c(time, a)
-
-      aIndex <- aIndex + 1
-      dIndex <- dIndex + 1
-    } else if(a < d) { #Arrivée avant départ pour ces indexes
-      currentCount <- currentCount + 1
-      count <- c(count, currentCount)
-      time <- c(time, a)
-
-      aIndex <- aIndex + 1
-    } else { #Départ avant arrivée pour ces indexes
-      currentCount <- currentCount - 1
-      count <- c(count, currentCount)
-      time <- c(time, d)
-
-      dIndex <- dIndex + 1
-    }
-
-  }
-
-  return(list(time, count))
-}
-
-evoFileBis <- function(arrivee, depart) {
-
-  count <- 0
-  time <- 0
-
-  aIndex <- 1
-  dIndex <- 1
-  currentCount <- 0
-
-  aOver <- FALSE
-  dOver <- FALSE
-
-  #On itère les deux listes en même temps
-  repeat {
-
-    if(aIndex > length(arrivee)) {
-      aIndex <- length(arrivee)
-      aOver <- TRUE
-    }
-    if(dIndex > length(depart)) {
-      dIndex <- length(depart)
-      dOver <- TRUE
-    }
-    a <- arrivee[aIndex]
-    d <- depart[dIndex]
-
-    #Départ et arrivée en même temps
-    if(a == d) {
-      count <- c(count, currentCount)
-      time <- c(time, a)
-
-      aIndex <- aIndex + 1
-      dIndex <- dIndex + 1
-    } else if(a < d && aIndex <= length(arrivee) && !aOver) { #Arrivée avant départ pour ces indexes
-      currentCount <- currentCount + 1
-      count <- c(count, currentCount)
-      time <- c(time, a)
-
-      aIndex <- aIndex + 1
-    } else if(dIndex <= length(depart) && !dOver){ #Départ avant arrivée pour ces indexes
-      currentCount <- currentCount - 1
-      count <- c(count, currentCount)
-      time <- c(time, d)
-
-      dIndex <- dIndex + 1
-    } else { #Finalement break quand tous les indexes ont atteint leur max
-      break
-    }
-
-  }
-
-  return(list(time, count))
-}
-
 #Algorithme de complexité n + m (n = taille arrivee et m = taille depart)
-evoFileFinal <- function(arrivee, depart) {
+fileEvolution <- function(arrivee, depart) {
 
   N <- 0
   T <- 0
@@ -212,7 +118,7 @@ evoFileFinal <- function(arrivee, depart) {
   return(list("T" = T, "N" = N))
 }
 
-esperance <- function(arrivee, depart, T, N) {
+esperanceFile <- function(arrivee, depart, T, N) {
   sum <- 0
   for(i in 1:(length(N) - 1)) {
     sum <- sum + N[i] * (T[i+1] - T[i])

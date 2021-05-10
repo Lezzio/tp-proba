@@ -72,26 +72,26 @@ length(x)
 
 LoiBinomiale <- function(n, p)
 {
-  u = runif(1)
-  k = 0
-  somme = 0
+  u <- runif(1)
+  k <- 0
+  somme <- 0
   while (u > somme) {
-    k = k + 1
-    pk = choose(n, k) * (p^k) * ((1 - p)^(n - k)) #Taille d'intervalle Pk
-    somme = somme + pk
+    k <- k + 1
+    pk <- choose(n, k) * (p^k) * ((1 - p)^(n - k)) #Taille d'intervalle Pk
+    somme <- somme + pk
   }
   return(k) #Num�ro de l'intervalle dans lequel on est
 }
 
 LoiGausienne <- function(n, p)
 {
-  u = runif(1)
-  k = 0
-  somme = 0
+  u <- runif(1)
+  k <- 0
+  somme <- 0
   while (u > somme) {
-    k = k + 1
-    pk = dnorm(k, n * p, sqrt(n * p * (1 - p))) #Taille d'intervalle Pk
-    somme = somme + pk
+    k <- k + 1
+    pk <- dnorm(k, n * p, sqrt(n * p * (1 - p))) #Taille d'intervalle Pk
+    somme <- somme + pk
   }
   return(k) #Num�ro de l'intervalle dans lequel on est
 }

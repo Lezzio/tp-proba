@@ -412,14 +412,19 @@ En augmentant D pour approcher la vraie valeur W. On en déduit que, lorsque D a
 ```{r}
 par(mfrow = c(2, 2))
 filemm1First <- FileMM1(0.1, 0.183, 12 * 60)
-plot(filemm1First[[1]], filemm1First[[2]], type = "s", main = "Évolution d'une file λ=0.1 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
+firstEvolution <- fileEvolution(filemm1First[[1]], filemm1First[[2]])
+plot(firstEvolution[[1]], firstEvolution[[2]], type = "s", main = "Évolution d'une file λ=0.1 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
 
 filemm1Second <- FileMM1(10 / 60, 0.183, 12 * 60) #Lambda ~ 0.1667
-plot(filemm1Second[[1]], filemm1Second[[2]], type = "s", main = "Évolution d'une file λ=0.1667 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
+secondEvolution <- fileEvolution(filemm1Second[[1]], filemm1Second[[2]])
+plot(secondEvolution[[1]], secondEvolution[[2]], type = "s", main = "Évolution d'une file λ=0.1667 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
 
 filemm1Third <- FileMM1(11 / 60, 0.183, 12 * 60) #Lambda ~ 0.1833
-plot(filemm1Third[[1]], filemm1Third[[2]], type = "s", main = "Évolution d'une file λ=0.1667 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
+thirdEvolution <- fileEvolution(filemm1Third[[1]], filemm1Third[[2]])
+plot(thirdEvolution[[1]], thirdEvolution[[2]], type = "s", main = "Évolution d'une file λ=0.183 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
 
 filemm1Fourth <- FileMM1(0.25, 0.183, 12 * 60)
-plot(filemm1Fourth[[1]], filemm1Fourth[[2]], type = "s", main = "Évolution d'une file λ=0.1667 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
+fourthEvolution <- fileEvolution(filemm1Fourth[[1]], filemm1Fourth[[2]])
+plot(fourthEvolution[[1]], fourthEvolution[[2]], type = "s", main = "Évolution d'une file λ=0.25 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
+
 ```
