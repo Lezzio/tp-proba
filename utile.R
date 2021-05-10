@@ -61,3 +61,49 @@ Runs <- function(x, nb)
   
   return(Pvaleur)
 }
+
+### Files
+FileMM1 <- function(lambda, mu, D) {
+  
+  totalArriveeTime <- 0
+  arrivee <- vector()
+  
+  repeat {
+    #On génère la valeur suivant la loi exponentielle de paramètre lambda
+    T <- rexp(1, lambda)
+    
+    totalArriveeTime <- totalArriveeTime + T
+    
+    #On vérifie si on ne dépasse pas le temps d'observation de la chaîne D
+    if(totalArriveeTime >= D) {
+      break;
+    }
+    
+    #On ajoute l'élément à la liste des arrivées
+    arrivee <- c(arrivee, totalArriveeTime)
+  }
+  
+  totalDepartTime <- arrivee[1]
+  depart <- vector()
+  
+  for(arrival in arrivee) {
+    #On génère la valeur suivant la loi exponentielle de paramètre mu
+    stayTime <- rexp(1, mu)
+    
+    #Si l'arrivée courante est plus récente que totalDepartTime alors on part au moins de l'arrivée courante pour la date de départ
+    if(totalDepartTime < arrival) {
+      totalDepartTime <- arrival
+    }
+    
+    totalDepartTime <- totalDepartTime + stayTime
+    
+    if(totalDepartTime > D) {
+      break
+    }
+    
+    #On ajoute l'élément à la liste des départs
+    depart <- c(depart, totalDepartTime)
+  }
+  
+  return (list("arrivee" = arrivee, "depart" = depart))
+}

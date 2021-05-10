@@ -140,6 +140,7 @@ evoFileBis <- function(arrivee, depart) {
   return(list(time, count))
 }
 
+#Algorithme de complexité n + m (n = taille arrivee et m = taille depart)
 evoFileFinal <- function(arrivee, depart) {
 
   N <- 0
@@ -155,6 +156,7 @@ evoFileFinal <- function(arrivee, depart) {
   #On itère les deux listes en même temps
   repeat {
 
+    #On gère les index
     if(aIndex > length(arrivee)) {
       aIndex <- length(arrivee)
       aOver <- TRUE
@@ -187,14 +189,14 @@ evoFileFinal <- function(arrivee, depart) {
 
       aIndex <- aIndex + 1
       dIndex <- dIndex + 1
-    } else if(a < d && aIndex && !aOver) { #Arrivée avant départ pour ces indexes
+    } else if(a < d && aIndex && !aOver) { #Arrivée avant départ pour ces index
       #INCRÉMENTE ARRIVÉE
       currentCount <- currentCount + 1
       N <- c(N, currentCount)
       T <- c(T, a)
 
       aIndex <- aIndex + 1
-    } else if(d <= a && !dOver){ #Départ avant arrivée pour ces indexes
+    } else if(d <= a && !dOver){ #Départ avant arrivée pour ces index
       #INCRÉMENTE DÉPART
       currentCount <- currentCount - 1
       N <- c(N, currentCount)
@@ -210,7 +212,7 @@ evoFileFinal <- function(arrivee, depart) {
   return(list(T, N))
 }
 
-esperance <- function(arrivee, depart, T, N, lambda, mu) {
+esperance <- function(arrivee, depart, T, N) {
   sum <- 0
   for(i in 1:(length(N) - 1)) {
     sum <- sum + N[i] * (T[i+1] - T[i])
