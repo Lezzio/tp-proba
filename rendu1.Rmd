@@ -249,28 +249,28 @@ Simulons une loi binomiale à partir de la loi uniforme $U$. Faisons de même av
 ```{r}
 LoiBinomiale <- function(n, p)
 {
-  u = runif(1)
-  k = 0
-  somme = 0
+  u <- runif(1)
+  k <- 0
+  somme <- 0
   while (u > somme) {
-    k = k + 1
-    pk = choose(n, k) * (p^k) * ((1 - p)^(n - k))
-    somme = somme + pk
+    k <- k + 1
+    pk <- choose(n, k) * (p^k) * ((1 - p)^(n - k)) #Taille d'intervalle Pk
+    somme <- somme + pk
   }
-  return(k)
+  return(k) #Numéro de l'intervalle dans lequel on est
 }
 
 LoiGausienne <- function(n, p)
 {
-  u = runif(1)
-  k = 0
-  somme = 0
+  u <- runif(1)
+  k <- 0
+  somme <- 0
   while (u > somme) {
-    k = k + 1
-    pk = dnorm(k, n * p, sqrt(n * p * (1 - p)))
-    somme = somme + pk
+    k <- k + 1
+    pk <- dnorm(k, n * p, sqrt(n * p * (1 - p))) #Taille d'intervalle Pk
+    somme <- somme + pk
   }
-  return(k)
+  return(k) #Numéro de l'intervalle dans lequel on est
 }
 ```
 
@@ -412,9 +412,9 @@ fourthEvolution <- fileEvolution(filemm1Fourth[[1]], filemm1Fourth[[2]])
 plot(fourthEvolution[[1]], fourthEvolution[[2]], type = "s", main = "Évolution d'une file λ=0.25 µ=0.183", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
 
 ```
+
+
 La durée entre deux arrivées suit une loi exponentielle de paramètre λ, dont l’espérance est 1/λ. C’est-à-dire que le temps moyen d’attente d’une nouvelle arrivée est de 1/λ. Autrement dit, on a une moyenne de λ arrivées par unité de temps. Ainsi, sur un intervalle de temps t, on a bien une moyenne de λt arrivées.
-
-
 
 Dans tous les cas, 15 personnes partent en moyenne par heure. Si seulement 8 clients arrivent par heure (graph 1), tout le monde est vite servi, et la file est principalement vide. Pour 14 et 15, malgré des pics d'attente, la file reste souvent vide.
 Enfin, pour 20 clients / heure, le serveur n'arrive pas à servir assez de monde : le flux entrant est trop important, la file s'allonge et le serveur sature. On en conclue qu'il ne faut pas excéder les possibilités du serveur en terme de capacité, sous peine de voir une saturation rapide.
@@ -424,10 +424,21 @@ Enfin, pour 20 clients / heure, le serveur n'arrive pas à servir assez de monde
 On va étudier un régime stable, c’est-à-dire dans le cas où on a  α = λ/µ < 1. Cela veut dire que le nombre moyen d’arrivées en un certain temps est inférieur au nombre de départs, et que le nombre de personnes dans la file d’attente va se stabiliser. Ainsi, la file ne s’encombre pas et ne saturera pas.
 
 Il s’agit ici de calculer le nombre moyen de clients dans le système E(N) ainsi que le temps de présence d’un client dans le système E(W). Nous devons vérifier la formule de Little : E(N) = λ E(W), λ représentant le nombre moyen d’arrivée de clients par minute.
-Pour calculer E(N), on reprend les résultats de la question 7 et on fait la moyenne du nombre de clients en attente. /!\ Attention, il ne suffit pas de sommer les N et de diviser par le nombre de valeurs, car les mesures de N ne sont pas faites à intervalles réguliers, mais seulement lorsqu’un client arrive ou repart. Ainsi, il faut multiplier la valeur de N par le temps pendant lequel ce N vaut. Enfin, on divise le résultat par le temps total en minutes.
+Pour calculer E(N), on reprend les résultats de la question 7 et on fait la moyenne du nombre de clients en attente. Attention, il ne suffit pas de sommer les N et de diviser par le nombre de valeurs, car les mesures de N ne sont pas faites à intervalles réguliers, mais seulement lorsqu’un client arrive ou repart. Ainsi, il faut multiplier la valeur de N par le temps pendant lequel ce N vaut. Enfin, on divise le résultat par le temps total en minutes.
 
 ```{r}
-#e <- esperanceFile(a[[1]], a[[2]], evo[[1]], evo[[2]])
+filemm1 <- FileMM1(0.1, 0.183, 12 * 60)
+evolution <- fileEvolution(filemm1[[1]], filemm1[[2]])
+e1 <- esperanceFile(filemm1[[1]], filemm1[[2]], evolution[[1]], evolution[[2]])
+
+filemm1 <- FileMM1(2, 5, 10 * 12 * 60)
+evolution <- fileEvolution(filemm1[[1]], filemm1[[2]])
+e2 <- esperanceFile(filemm1[[1]], filemm1[[2]], evolution[[1]], evolution[[2]])
 ```
+
+$\lambda$               | $\mathbb{E}(W)$ calculée | $\mathbb{E}(N)$ calculée         | $\lambda\mathbb{E}(W)$ calculée
+----------------------- | ----------------------- | ----------------------- | -----------------------
+0.1                       | `r e1$esperanceW`             | `r e1$esperanceN`             | `r 0.1*e1$esperanceW`
+2                      | `r e2$esperanceW`             | `r e2$esperanceN`             | `r 2*e2$esperanceW`
 
 On trouve bien deux valeurs très proches pour E(N) et λE(W). Les valeurs faibles (autour de 1), ce qui signifie qu’il y a très peu de personnes dans la file d’attente. (ex : si E(N)=1.3, alors il y a en moyenne 1.3 personnes dans le système, donc 1 personne dont la requête est en train d’être traitée et en moyenne 0.3 personne en train d’attendre son tour).

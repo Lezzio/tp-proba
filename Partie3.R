@@ -16,4 +16,15 @@ evo <- fileEvolution(a[[1]], a[[2]])
 plot(b[[1]], b[[2]], type = "s", main = "Évolution d'une file", ylab = "N (nombre de requêtes)", xlab = "Temps (m)")
 
 e <- esperanceFile(a[[1]], a[[2]], evo[[1]], evo[[2]])
-e
+#e
+
+
+filemm1 <- FileMM1(0.1, 0.183, 12 * 60)
+evolution <- fileEvolution(filemm1First[[1]], filemm1First[[2]])
+e1 <- esperanceFile(filemm1[[1]], filemm1[[2]], evolution[[1]], evolution[[2]])
+filemm1 <- FileMM1(5, 7, 12 * 60)
+evolution <- fileEvolution(filemm1First[[1]], filemm1First[[2]])
+e2 <- esperanceFile(filemm1[[1]], filemm1[[2]], evolution[[1]], evolution[[2]])
+
+e1
+e2
