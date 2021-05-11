@@ -60,6 +60,13 @@ print(verifTest / 100) #Nb de Pval passant le test de vérif
 #VN : 14bits, Mersenne : 32, RANDU + Standard : 31
 
 #Q4
+
+#Vérification run
+a <- Runs(619,10)
+a
+a <- Runs(c(19,11),5)
+a
+
 x <- Runs(RANDU(graines[1], 1000), 31)
 for (i in 2:100) {
   x <- c(x, Runs(RANDU(graines[i], 1000), 31))

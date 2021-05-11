@@ -1,6 +1,6 @@
 ---
-title: "Rendu1"
-author: "B3404"
+title: "Rendu TP probabilités"
+author: "B3404 et A. Guigal"
 date: "09/05/2021"
 output:
 html_document:

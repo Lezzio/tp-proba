@@ -15,5 +15,4 @@ for (i in 1:1000) {
 }
 plot(table(gaussi), main = 'Gausienne', xlab = 'Nb de succ�s', ylab = 'Fr�quence')
 
-
 microbenchmark(100, SimInversion(), SimRejet())
